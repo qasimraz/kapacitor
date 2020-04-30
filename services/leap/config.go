@@ -2,8 +2,6 @@ package leap
 
 import (
 	"errors"
-
-	"github.com/influxdata/kapacitor/listmap"
 )
 
 // Config declares the needed configuration options for the service Wfe
@@ -12,13 +10,7 @@ type Config struct {
 	URL       string `toml:"url" override:"url"`
 	AuthToken string `toml:"token" override:"token"`
 	Workflow  string `toml:"workflow" override:"workflow"`
-	Workspace string `toml:"workspace"  override:"workspace"`
-}
-
-type Configs []Config
-
-func (cs *Configs) UnmarshalTOML(data interface{}) error {
-	return listmap.DoUnmarshalTOML(cs, data)
+	// Workspace string `toml:"workspace"  override:"workspace"`
 }
 
 // NewConfig returns a blank config
