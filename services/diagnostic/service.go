@@ -202,6 +202,12 @@ func (s *Service) NewKafkaHandler() *KafkaHandler {
 	}
 }
 
+func (s *Service) NewLeapHandler() *LeapHandler {
+	return &LeapHandler{
+		l: s.Logger.With(String("service", "leap")),
+	}
+}
+
 func (s *Service) NewPagerDutyHandler() *PagerDutyHandler {
 	return &PagerDutyHandler{
 		l: s.Logger.With(String("service", "pagerduty")),

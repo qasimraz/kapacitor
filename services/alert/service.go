@@ -18,6 +18,7 @@ import (
 	"github.com/influxdata/kapacitor/services/httpd"
 	"github.com/influxdata/kapacitor/services/httppost"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/mqtt"
 	"github.com/influxdata/kapacitor/services/opsgenie"
 	"github.com/influxdata/kapacitor/services/opsgenie2"
@@ -89,6 +90,11 @@ type Service struct {
 	}
 	KafkaService interface {
 		Handler(kafka.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
+	LeapService interface {
+		// DefaultHandlerConfig() leap.HandlerConfig
+		// Handler(leap.HandlerConfig, *log.Logger) alert.Handler
+		Handler(leap.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
 	MQTTService interface {
 		Handler(mqtt.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
@@ -803,6 +809,17 @@ func (s *Service) createHandlerFromSpec(spec HandlerSpec) (handler, error) {
 			return handler{}, err
 		}
 		h, err = s.KafkaService.Handler(c, ctx...)
+		if err != nil {
+			return handler{}, err
+		}
+		h = newExternalHandler(h)
+	case "leap":
+		c := leap.HandlerConfig{}
+		err = decodeOptions(spec.Options, &c)
+		if err != nil {
+			return handler{}, err
+		}
+		h, err = s.LeapService.Handler(c, ctx...)
 		if err != nil {
 			return handler{}, err
 		}

@@ -20,6 +20,7 @@ import (
 	"github.com/influxdata/kapacitor/services/hipchat"
 	"github.com/influxdata/kapacitor/services/httppost"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/mqtt"
 	"github.com/influxdata/kapacitor/services/opsgenie"
 	"github.com/influxdata/kapacitor/services/opsgenie2"
@@ -341,6 +342,24 @@ func newAlertNode(et *ExecutingTask, n *pipeline.AlertNode, d NodeDiagnostic) (a
 		h, err := et.tm.KafkaService.Handler(c, ctx...)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create kafka handler")
+		}
+		an.handlers = append(an.handlers, h)
+	}
+
+	for _, f := range n.LeapHandlers {
+		c := leap.HandlerConfig{
+			// Cluster:  k.Cluster,
+			// Topic:    k.KafkaTopic,
+			// Template: k.Template,
+		}
+		// c := et.tm.LeapService.DefaultHandlerConfig()
+		if f.Workflow != "" {
+			c.Workflow = f.Workflow
+		}
+		// h := et.tm.LeapService.Handler(c, l)
+		h, err := et.tm.LeapService.Handler(c, ctx...)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create leap handler")
 		}
 		an.handlers = append(an.handlers, h)
 	}

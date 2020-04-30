@@ -39,6 +39,7 @@ import (
 	"github.com/influxdata/kapacitor/services/influxdb"
 	"github.com/influxdata/kapacitor/services/k8s"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/load"
 	"github.com/influxdata/kapacitor/services/marathon"
 	"github.com/influxdata/kapacitor/services/mqtt"
@@ -265,6 +266,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	// Append alert service
 	s.appendAlertService()
+	s.appendLeapService()
 
 	// Append these after InfluxDB because they depend on it
 	s.appendTaskStoreService()
@@ -754,6 +756,24 @@ func (s *Server) appendKafkaService() {
 
 	s.SetDynamicService("kafka", srv)
 	s.AppendService("kafka", srv)
+}
+
+func (s *Server) appendLeapService() {
+	c := s.config.Leap
+	d := s.DiagService.NewLeapHandler()
+	srv, err := leap.NewService(c, d)
+	if err != nil {
+		return
+	}
+	// c := s.config.Leap
+	// l := s.LogService.NewLogger("[leap] ", log.LstdFlags)
+	// srv := leap.NewService(c, l)
+
+	s.TaskMaster.LeapService = srv
+	s.AlertService.LeapService = srv
+
+	s.SetDynamicService("leap", srv)
+	s.AppendService("leap", srv)
 }
 
 func (s *Server) appendAlertaService() {

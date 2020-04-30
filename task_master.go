@@ -25,6 +25,7 @@ import (
 	"github.com/influxdata/kapacitor/services/httppost"
 	k8s "github.com/influxdata/kapacitor/services/k8s/client"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/mqtt"
 	"github.com/influxdata/kapacitor/services/opsgenie"
 	"github.com/influxdata/kapacitor/services/opsgenie2"
@@ -170,6 +171,11 @@ type TaskMaster struct {
 	KafkaService interface {
 		Handler(kafka.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
 	}
+	LeapService interface {
+		// DefaultHandlerConfig() leap.HandlerConfig
+		// Handler(leap.HandlerConfig, *log.Logger) alert.Handler
+		Handler(leap.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
+	}
 	AlertaService interface {
 		DefaultHandlerConfig() alerta.HandlerConfig
 		Handler(alerta.HandlerConfig, ...keyvalue.T) (alert.Handler, error)
@@ -290,6 +296,7 @@ func (tm *TaskMaster) New(id string) *TaskMaster {
 	n.K8sService = tm.K8sService
 	n.Commander = tm.Commander
 	n.SideloadService = tm.SideloadService
+	n.LeapService = tm.LeapService
 	return n
 }
 

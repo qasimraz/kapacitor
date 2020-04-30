@@ -29,6 +29,7 @@ import (
 	"github.com/influxdata/kapacitor/services/influxdb"
 	"github.com/influxdata/kapacitor/services/k8s"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/load"
 	"github.com/influxdata/kapacitor/services/marathon"
 	"github.com/influxdata/kapacitor/services/mqtt"
@@ -102,6 +103,7 @@ type Config struct {
 	Talk       talk.Config       `toml:"talk" override:"talk"`
 	Telegram   telegram.Config   `toml:"telegram" override:"telegram"`
 	VictorOps  victorops.Config  `toml:"victorops" override:"victorops"`
+	Leap       leap.Config       `toml:"leap" override:"leap"`
 
 	// Discovery for scraping
 	Scraper         []scraper.Config          `toml:"scraper" override:"scraper,element-key=name"`
@@ -171,6 +173,7 @@ func NewConfig() *Config {
 	c.SNMPTrap = snmptrap.NewConfig()
 	c.Telegram = telegram.NewConfig()
 	c.VictorOps = victorops.NewConfig()
+	c.Leap = leap.NewConfig()
 
 	c.Reporting = reporting.NewConfig()
 	c.Stats = stats.NewConfig()
@@ -229,6 +232,9 @@ func (c *Config) Validate() error {
 		return errors.Wrap(err, "tls")
 	}
 	if err := c.Load.Validate(); err != nil {
+		return err
+	}
+	if err := c.Leap.Validate(); err != nil {
 		return err
 	}
 	// Validate the set of InfluxDB configs.

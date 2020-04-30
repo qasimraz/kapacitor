@@ -23,6 +23,7 @@ import (
 	"github.com/influxdata/kapacitor/services/influxdb"
 	"github.com/influxdata/kapacitor/services/k8s"
 	"github.com/influxdata/kapacitor/services/kafka"
+	"github.com/influxdata/kapacitor/services/leap"
 	"github.com/influxdata/kapacitor/services/mqtt"
 	"github.com/influxdata/kapacitor/services/opsgenie"
 	"github.com/influxdata/kapacitor/services/opsgenie2"
@@ -428,6 +429,23 @@ func (h *KafkaHandler) Error(msg string, err error) {
 }
 func (h *KafkaHandler) InsecureSkipVerify() {
 	h.l.Info("service is configured to skip ssl verification")
+}
+
+// Leap handler
+type LeapHandler struct {
+	l Logger
+}
+
+func (h *LeapHandler) WithContext(ctx ...keyvalue.T) leap.Diagnostic {
+	fields := logFieldsFromContext(ctx)
+
+	return &LeapHandler{
+		l: h.l.With(fields...),
+	}
+}
+
+func (h *LeapHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
 }
 
 // HTTPD handler

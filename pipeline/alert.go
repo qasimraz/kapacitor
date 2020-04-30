@@ -385,6 +385,10 @@ type AlertNodeData struct {
 	// Send alert to Kafka topic
 	// tick:ignore
 	KafkaHandlers []*KafkaHandler `tick:"Kafka" json:"kafka"`
+
+	// Send alert to Foo.
+	// tick:ignore
+	LeapHandlers []*LeapHandler `tick:"leap"`
 }
 
 func newAlertNode(wants EdgeType) *AlertNode {
@@ -1957,4 +1961,23 @@ type KafkaHandler struct {
 	// Template used to construct the message body
 	// If empty the alert data in JSON is sent as the message body.
 	Template string `json:"template"`
+}
+
+// Send alert to a Leap server.
+// tick:property
+func (a *AlertNode) Leap() *LeapHandler {
+	f := &LeapHandler{
+		AlertNode: a,
+	}
+	a.LeapHandlers = append(a.LeapHandlers, f)
+	return f
+}
+
+// tick:embedded:AlertNode.Leap
+type LeapHandler struct {
+	*AlertNode
+
+	// The room for the messages.
+	// Defaults to the room in the configuration if empty.
+	Workflow string
 }
